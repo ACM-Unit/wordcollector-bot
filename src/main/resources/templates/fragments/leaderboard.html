@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="leaderboard-table">
+    <table class="rank-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Ім'я</th>
+            <th>Бали</th>
+            <th>Дії</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user, iterStat : ${users}">
+            <td>
+                        <span th:class="${iterStat.index == 0 ? 'rank-badge rank-1' :
+                                          (iterStat.index == 1 ? 'rank-badge rank-2' :
+                                           (iterStat.index == 2 ? 'rank-badge rank-3' : 'rank-badge rank-other'))}"
+                              th:text="${iterStat.index + 1}">1</span>
+            </td>
+            <td>
+                <strong th:text="${user.name}">Name</strong>
+            </td>
+            <td>
+                <span class="points" th:text="${user.housePoints} + ' 🌟'">0</span>
+            </td>
+            <td>
+                <div class="actions">
+                    <button class="btn btn-earn"
+                            th:attr="data-user-id=${user.id}"
+                            th:onclick="processPoints([[${user.id}]], 'EARN')">
+                        ➕
+                    </button>
+
+                    <button class="btn btn-spend"
+                            th:attr="data-user-id=${user.id}"
+                            th:onclick="processPoints([[${user.id}]], 'SPEND')">
+                        🛒
+                    </button>
+                </div>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(users)}">
+            <td colspan="4" style="text-align: center; padding: 40px;">
+                <p style="font-size: 1.2em; color: #999;">
+                    Поки що немає учасників. Додайте першого! 🎯
+                </p>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+
+</html>

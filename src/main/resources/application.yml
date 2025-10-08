@@ -1,0 +1,40 @@
+server:
+  port: ${PORT:8020}
+spring:
+  thymeleaf:
+    mode: HTML
+    cache: false  # Set to true in production
+    prefix: classpath:/templates/
+    suffix: .html
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:54321}/${RDS_DB_NAME:wordcollector}
+    user: ${RDS_USERNAME:postgres}
+    password: ${RDS_PASSWORD:acmunit22}
+    locations: classpath:db/migration
+  application:
+    name: antischool
+  datasource:
+    url: jdbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:54321}/${RDS_DB_NAME:wordcollector}
+    username: ${RDS_USERNAME:postgres}
+    password: ${RDS_PASSWORD:acmunit22}
+    driver-class-name: org.postgresql.Driver
+  r2dbc:
+    url: r2dbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:54321}/${RDS_DB_NAME:wordcollector}
+    username: ${RDS_USERNAME:postgres}
+    password: ${RDS_PASSWORD:acmunit22}
+
+logging:
+  level:
+    reactor.netty: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.telegram: DEBUG
+    org.flywaydb: DEBUG
+    org.springframework.boot.autoconfigure.flyway: DEBUG
+    org.springframework:
+
+      web:
+        socket: DEBUG
+        reactive:
+          socket: DEBUG
+      messaging: DEBUG

@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS quick_actions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    amount INTEGER NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

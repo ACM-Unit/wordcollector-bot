@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="transactions-list" class="transactions">
+    <!-- Transaction items -->
+    <div th:each="trans : ${transactions}"
+         th:class="${trans.transaction.type ==T(org.telegram.antischool.model.Type).EARN} ? 'transaction-item transaction-earn' : 'transaction-item transaction-spend'">
+
+        <!-- Transaction type and amount -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong th:text="${trans.user.name}">User</strong>
+                <strong th:text="${trans.transaction.type == T(org.telegram.antischool.model.Type).EARN} ? '✅ Заробив' : '🛍️ Витратив'">Type</strong>
+                <span th:text="' ' + ${trans.transaction.amount} + ' балів'" style="font-weight: bold;">0 балів</span>
+            </div>
+            <div style="font-size: 0.85em; color: #999;"
+                 th:text="${#temporals.format(trans.transaction.createdAt, 'HH:mm')}">Time</div>
+        </div>
+
+        <!-- Description -->
+        <div style="margin-top: 5px; color: #555;">
+            <span th:text="${trans.transaction.description}">Description</span>
+        </div>
+
+        <!-- Full date -->
+        <div style="font-size: 0.8em; color: #999; margin-top: 5px;"
+             th:text="${#temporals.format(trans.transaction.createdAt, 'dd.MM.yyyy')}">Date</div>
+    </div>
+
+    <!-- Empty state -->
+    <div th:if="${#lists.isEmpty(transactions)}"
+         style="text-align: center; padding: 40px; color: #999;">
+        <p style="font-size: 1.1em;">
+            📜 Поки що немає транзакцій
+        </p>
+        <p style="font-size: 0.9em; margin-top: 10px;">
+            Почніть нараховувати бали! 🌟
+        </p>
+    </div>
+</div>
+</body>
+</html>

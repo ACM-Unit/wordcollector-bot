@@ -1,0 +1,18 @@
+<table>
+    <thead>
+    <tr>
+        <th>Member</th>
+        <th>Points</th>
+        <th>Progress</th>
+        <th style="text-align:right">Actions</th>
+    </tr>
+    </thead>
+    <tbody id="membersTbody">
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.housePoints}"></td>
+        <td><input type="number" name="pointNumbers" min="1" max="30"/><button class="btn" name="addCustomBtn">Add point</button></td>
+    </tr>
+    </tbody>
+</table>

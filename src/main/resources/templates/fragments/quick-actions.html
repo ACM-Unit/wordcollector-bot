@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<body>
+<div th:fragment="quick-actions">
+    <div class="quick-actions">
+        <!-- For each user, create quick action buttons -->
+        <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #667eea; width: 100%">
+            <h3 th:text="${'Зарахування балів для користувача ' + user.name}" style="margin-bottom: 15px; color: #667eea; text-align: center;">Name</h3>
+                <button class="btn quick-btn" style="display: block; margin-bottom: 5px;"
+                        th:attr="data-user-id=${user.id}"
+                        th:onclick="addQuickAction([[${user.id}]], 'EARN')">
+                    ➕
+                </button>
+            <div th:each="action, iterStat : ${earnActions}">
+                <!-- Прибрав іграшки - 5 балів -->
+                <div style="display: inline-flex; width: 100%">
+                    <form hx-get="/api/quick-earn-points"
+                          hx-target="#leaderboard-table"
+                          hx-swap="innerHTML"
+                          hx-on::after-request="htmx.trigger('body', 'userUpdated')"
+                          style="margin-bottom: 10px; width: 75%">
+                        <input type="hidden" name="id" th:value="${user.id}">
+                        <input type="hidden" name="points" th:value="${action.amount}">
+                        <input type="hidden" name="description" th:value="${action.name}">
+                        <button type="submit" class="btn quick-btn" style="width: 100%; padding: 7px">
+                            <span th:text="${action.name}"></span>
+                            <strong style="display: block; margin-top: 5px; color: #10b981;"
+                                    th:text="${'+' + action.amount + ' балів'}"></strong>
+                        </button>
+                    </form>
+                    <form hx-get="/api/remove-quick-action"
+                          hx-swap="innerHTML"
+                          hx-on::after-request="htmx.trigger('body', 'userUpdated')"
+                          style="margin-bottom: 10px; width: 22%">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <input type="hidden" name="id" th:value="${action.id}">
+                        <button type="submit" class="btn quick-btn" style="margin-inline: 5px; width: 100%; font-size: 28px">
+                            <span>🗑️</span>
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #667eea; width: 100%">
+            <h3 th:text="${'Зняття балів для користувача ' + user.name}" style="margin-bottom: 15px; color: #667eea; text-align: center;">Name</h3>
+                <button class="btn quick-btn" style="display: block; margin-bottom: 5px;"
+                        th:attr="data-user-id=${user.id}"
+                        th:onclick="addQuickAction([[${user.id}]], 'SPEND')">
+                    🛒
+                </button>
+            <div th:each="action, iterStat : ${spendActions}">
+                <div style="display: inline-flex; width: 100%">
+                    <form hx-get="/api/quick-spend-points"
+                          hx-target="#leaderboard-table"
+                          hx-swap="innerHTML"
+                          hx-on::after-request="htmx.trigger('body', 'userUpdated')"
+                          style="margin-bottom: 10px; width: 70%">
+                        <input type="hidden" name="id" th:value="${user.id}">
+                        <input type="hidden" name="points" th:value="${action.amount}">
+                        <input type="hidden" name="description" th:value="${action.name}">
+                        <button type="submit" class="btn quick-btn" style="width: 100%; padding: 7px">
+                            <span th:text="${action.name}"></span>
+                            <strong style="display: block; margin-top: 5px; color: #b9103d;"
+                                    th:text="${'-' + action.amount + ' балів'}"></strong>
+                        </button>
+                    </form>
+                    <form hx-get="/api/remove-quick-action"
+                          hx-swap="innerHTML"
+                          hx-on::after-request="htmx.trigger('body', 'userUpdated')"
+                          style="margin-bottom: 10px; width: 27%">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <input type="hidden" name="id" th:value="${action.id}">
+                        <button type="submit" class="btn quick-btn" style="margin-inline: 5px; width: 100%; font-size: 28px">
+                            <span>🗑️</span>
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

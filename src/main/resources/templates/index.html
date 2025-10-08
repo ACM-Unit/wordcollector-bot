@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 House Points Tracker</title>
+    <script>
+        function processPoints(id, type) {
+             const points = prompt("Скільки балів?");
+             if (!points) return;
+             const description = prompt("За що?");
+             fetch(type === 'EARN' ?'/api/earn-points' : '/api/spend-points', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                     id: id,
+                     points: parseInt(points),
+                     description: description
+                 })
+             })
+             .then(response => response.text())
+             .then(html => {
+                 document.getElementById('leaderboard-table').innerHTML = html;
+                 htmx.trigger('body', 'userUpdated');
+             });
+        }
+        function addQuickAction(id, type) {
+            const points = prompt("Скільки балів?");
+            if (!points) return;
+            const description = prompt("За що?");
+            fetch(type === 'EARN' ? '/api/add-quick-earn-action' : '/api/add-quick-spend-action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    points: parseInt(points),
+                    description: description
+                })
+            })
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('quick-actions').innerHTML = html;
+                    htmx.trigger('body', 'userUpdated');
+                });
+        }
+    </script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .leaderboard {
+            margin-bottom: 40px;
+        }
+
+        .rank-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .rank-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1em;
+        }
+
+        .rank-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rank-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            color: white;
+            font-size: 1em;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #808080); }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32, #8B4513); }
+        .rank-other { background: #667eea; }
+
+        .points {
+            font-size: 1em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 5px 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-earn {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-earn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-spend {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-spend:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .section {
+            background: #f8f9ff;
+
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .transactions {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            padding: 12px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .transaction-earn {
+            border-left-color: #10b981;
+        }
+
+        .transaction-spend {
+            border-left-color: #f59e0b;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* HTMX loading indicator */
+        .htmx-indicator {
+            display: none;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quick-btn {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            height: 60px;
+            color: black;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .rank-table {
+                font-size: 0.9em;
+            }
+
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏆 House Points Tracker</h1>
+
+    <!-- Messages -->
+    <div id="messages"></div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard">
+        <h2 style="color: #667eea; margin-bottom: 15px;">
+            📊 Таблиця лідерів
+            <span class="spinner htmx-indicator"></span>
+        </h2>
+        <div id="leaderboard-table"
+             hx-get="/api/leaderboard"
+             hx-trigger="load, userUpdated from:body"
+             hx-indicator=".spinner">
+            <!-- Leaderboard will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Quick Actions for Earning Points -->
+    <div class="section">
+        <h2>⭐ Швидке нарахування та зняття балів</h2>
+        <div id="quick-actions"
+             hx-get="/api/quick-actions"
+             hx-trigger="load, userUpdated from:body">
+            <!-- Quick action buttons will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section">
+        <h2>📜 Останні операції</h2>
+        <div id="transactions"
+             class="transactions"
+             hx-get="/api/transactions"
+             hx-trigger="load, userUpdated from:body"
+             hx-swap="innerHTML">
+            <!-- Transactions will be loaded here -->
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
