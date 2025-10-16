@@ -8,21 +8,21 @@ spring:
     suffix: .html
   flyway:
     enabled: true
-    url: jdbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:54321}/${RDS_DB_NAME:wordcollector}
-    user: ${RDS_USERNAME:postgres}
-    password: ${RDS_PASSWORD:acmunit22}
+    url: jdbc:postgresql://ep-tiny-thunder-ab0kaoc6-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    user: neondb_owner
+    password: npg_U3Pz8ryAobWJ
     locations: classpath:db/migration
   application:
     name: antischool
   datasource:
-    url: jdbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:54321}/${RDS_DB_NAME:wordcollector}
-    username: ${RDS_USERNAME:postgres}
-    password: ${RDS_PASSWORD:acmunit22}
+    url: jdbc:postgresql://ep-tiny-thunder-ab0kaoc6-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_U3Pz8ryAobWJ
     driver-class-name: org.postgresql.Driver
   r2dbc:
-    url: r2dbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:54321}/${RDS_DB_NAME:wordcollector}
-    username: ${RDS_USERNAME:postgres}
-    password: ${RDS_PASSWORD:acmunit22}
+    url: r2dbc:postgresql://ep-tiny-thunder-ab0kaoc6.eu-west-2.aws.neon.tech/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_U3Pz8ryAobWJ
 
 logging:
   level:

@@ -111,12 +111,12 @@ public class ResponseHandler {
         } else if ("/start".equals(message.getText()) || "start".equals(message.getText())) {
             replyToStart(chatId);
         } else if ("to learned words".equals(message.getText())) {
-            service.changeWordStatus(List.of(ctx.getCurrentWord()), 2, m -> System.out.println(m.size()));
+            service.changeWordStatus(List.of(ctx.getCurrentWord()), 2).doOnNext(m -> System.out.println(m.size())).subscribe();
             ctx.removeCurrentWord();
         } else if ( "move to learned all words".equals(message.getText())) {
-            service.changeWordStatus(ctx.getWords(), 2, m -> System.out.println(m.size()));
+            service.changeWordStatus(ctx.getWords(), 2).doOnNext(m -> System.out.println(m.size())).subscribe();
         } else if ( "delete all words".equals(message.getText())) {
-            service.deleteWords(ctx.getWords(), m -> System.out.println(m.size()));
+            service.deleteWords(ctx.getWords()).doOnNext(m -> System.out.println(m.size())).subscribe();
         } else if ("change period".equals(message.getText())) {
             replyToChangePeriod(ctx);
         } else if ("add word to antischool".equals(message.getText())) {
@@ -131,7 +131,7 @@ public class ResponseHandler {
         } else if (ctx.getChatState() == AWAITING_TRANSLATE) {
             getTranslation(ctx);
         } else if (ctx.getChatState() == AWAITING_WORD_TO_ADD) {
-            service.translateWord(message.getText(), m -> System.out.println(m.size()));
+            service.translateWord(message.getText()).doOnNext(m -> System.out.println(m.size())).subscribe();
         } else if (ctx.getChatState() == PROCESSING) {
             getNextWord(ctx);
         }
@@ -140,12 +140,12 @@ public class ResponseHandler {
     private void receiveDataFromDB(ChatContext ctx, Message message) {
         int count = Integer.parseInt(message.getText());
         if (ctx.getWords() == null) {
-            service.getToLearnWords(count, m -> {
+            service.getToLearnWords(count).doOnNext(m -> {
                 ctx.setWords(m);
                 ctx.setIterators(m.iterator());
                 ctx.setChatState(PROCESSING);
                 getNextWord(ctx);
-            });
+            }).subscribe();
         } else {
             ctx.setIterators(ctx.getWords().iterator());
             ctx.setChatState(PROCESSING);

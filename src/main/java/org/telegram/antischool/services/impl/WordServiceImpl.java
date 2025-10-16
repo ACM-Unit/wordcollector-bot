@@ -4,11 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.telegram.antischool.dto.WordItem;
+import org.telegram.antischool.model.Word;
+import org.telegram.antischool.repositories.WordRepository;
 import org.telegram.antischool.repositories.WordSocketRepository;
 import org.telegram.antischool.services.WordService;
+import org.telegram.antischool.utils.Converter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 @Service
 public class WordServiceImpl implements WordService {
@@ -16,47 +20,58 @@ public class WordServiceImpl implements WordService {
     @Autowired
     WordSocketRepository repository;
 
+    @Autowired
+    WordRepository dbRepository;
+
     @Override
     @Cacheable("toLearn")
-    public void getToLearnWords(int count, Consumer<List<WordItem>> callback) {
-        repository.getArrayMessage(Messages.getToLearnVocabularyMessage(count), callback);
-
+    public Flux<List<WordItem>> getToLearnWords(int count) {
+        return repository.getArrayMessage(Messages.getToLearnVocabularyMessage(count))
+                .flatMap(words ->
+                        saveWord(words.stream()
+                                        .map(Converter::toEntity)
+                                        .toList())
+                                .then(Mono.just(words))
+                );
     }
 
     @Override
     @Cacheable("learned")
-    public void getLearnedWords(int count, Consumer<List<WordItem>> callback) {
-        repository.getArrayMessage(
-                Messages.getLearnedVocabularyMessage(
-                        count), callback);
+    public Flux<List<WordItem>> getLearnedWords(int count) {
+        return repository.getArrayMessage(Messages.getLearnedVocabularyMessage(count));
     }
 
     @Override
     @Cacheable("stat")
-    public void getPupilStatistic(Consumer<List<WordItem>> callback) {
-        repository.getDataMessage(Messages.getPupilStatMessage(), callback);
+    public Flux<List<WordItem>> getPupilStatistic() {
+        return repository.getDataMessage(Messages.getPupilStatMessage());
     }
 
     @Override
-    public void changeWordStatus(List<WordItem> words, int status, Consumer<List<WordItem>> callback) {
+    public Flux<List<WordItem>> changeWordStatus(List<WordItem> words, int status) {
         Integer[] wordsArray = words.stream().map(WordItem::getId).toList().toArray(new Integer[0]);
-        repository.getArrayDataMessage(Messages.getChangeStatusMessage(wordsArray, status), callback);
+        return repository.getArrayDataMessage(Messages.getChangeStatusMessage(wordsArray, status));
     }
 
     @Override
-    public void deleteWords(List<WordItem> words, Consumer<List<WordItem>> callback) {
+    public Flux<List<WordItem>> deleteWords(List<WordItem> words) {
         Integer[] wordsArray = words.stream().map(WordItem::getId).toList().toArray(new Integer[0]);
-        repository.getArrayDataMessage(Messages.deleteWordMessage(wordsArray), callback);
+        return repository.getArrayDataMessage(Messages.deleteWordMessage(wordsArray));
     }
 
     @Override
-    public void translateWord(String word, Consumer<List<WordItem>> callback) {
-        repository.getDataMessage(Messages.translateWordMessage(word), m -> repository.getValueMessage(Messages.addWordMessage(m.get(0)), callback));
+    public Flux<List<WordItem>> translateWord(String word) {
+        return repository.getDataMessage(Messages.translateWordMessage(word))
+                .flatMap(m ->
+                        repository.getValueMessage(Messages.addWordMessage(m.getFirst()))
+                                .thenMany(saveWord(m.stream().map(Converter::toEntity).toList()))
+                                .then(Mono.just(m))
+                );
     }
 
     @Override
-    public void saveWord(WordItem word) {
-
+    public Flux<Word> saveWord(List<Word> words) {
+        return dbRepository.saveAll(words);
     }
 
 }

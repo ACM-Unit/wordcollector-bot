@@ -25,8 +25,8 @@ import static org.telegram.abilitybots.api.util.AbilityUtils.getChatId;
 public class AntiSchoolBot extends AbilityBot {
 
     private ResponseHandler responseHandler;
-    private static final String TOKEN = "";
-    private static final String TEST_TOKEN = "";
+    private static final String TOKEN = "7903320298:AAH90yL4w9bg0e2ixDWstOMr3o9ed8pRMzg";
+    private static final String TEST_TOKEN = "8164430607:AAHzdnQ5LRm1KrmNXv_NtcazMgymdUsHfdw";
     private static final String BOT_USER_NAME = "acm_word_collector_bot";
     private static final String TEST_BOT_USER_NAME = "test_word_collector_bot";
 
@@ -37,7 +37,7 @@ public class AntiSchoolBot extends AbilityBot {
 
     // Extra constructor for testing
     public AntiSchoolBot(WordService service, ResponseHandler mockHandler) {
-        super(TEST_TOKEN, TEST_BOT_USER_NAME);
+        super(TOKEN, BOT_USER_NAME);
         this.responseHandler = mockHandler != null ? mockHandler : new ResponseHandler(silent, sender, db, service);
     }
     @Override

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.telegram.antischool.dto.SendRequestModel;
 import org.telegram.antischool.dto.WordItem;
+import org.telegram.antischool.model.Word;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,26 @@ public class Converter {
     private Converter(String nodeName, boolean isResultArray) {
         this.nodeName = nodeName;
         this.isResultArray = isResultArray;
+    }
+
+    public static Word toEntity(WordItem item) {
+        if (item == null) {
+            return null;
+        }
+
+        Word word = new Word();
+        word.setId(0); // optional, if generated or managed separately
+        word.setWordId(item.getId());
+        word.setWord(item.getWord());
+        word.setTranslation(item.getTranslation());
+        word.setPupilMaterialsId(item.getPupilMaterialsId());
+        word.setDateCreate(item.getDateCreate());
+        word.setAudio(item.getAudio());
+        word.setFileId(item.getFileId());
+        word.setStatus(item.getStatus());
+        word.setLearnedWords(item.getLearnedWords());
+        word.setWordsToStudied(item.getWordsToStudied());
+        return word;
     }
 
 

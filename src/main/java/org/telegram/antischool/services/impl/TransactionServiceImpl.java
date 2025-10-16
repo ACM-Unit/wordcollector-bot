@@ -23,6 +23,12 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private UserRepository userRepository;
 
+
+    @Override
+    public Flux<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
+
     @Override
     public Mono<Transaction> createTransaction(Transaction transaction) {
         return transactionRepository.save(transaction);

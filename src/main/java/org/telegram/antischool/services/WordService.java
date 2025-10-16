@@ -1,16 +1,17 @@
 package org.telegram.antischool.services;
 
 import org.telegram.antischool.dto.WordItem;
+import org.telegram.antischool.model.Word;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public interface WordService {
-    void getToLearnWords(int count, Consumer<List<WordItem>> callback);
-    void getLearnedWords(int count, Consumer<List<WordItem>> callback);
-    void getPupilStatistic(Consumer<List<WordItem>> callback);
-    void changeWordStatus(List<WordItem> words, int status, Consumer<List<WordItem>> callback);
-    void deleteWords(List<WordItem> words, Consumer<List<WordItem>> callback);
-    void translateWord(String word, Consumer<List<WordItem>> callback);
-    void saveWord(WordItem word);
+    Flux<List<WordItem>> getToLearnWords(int count);
+    Flux<List<WordItem>> getLearnedWords(int count);
+    Flux<List<WordItem>> getPupilStatistic();
+    Flux<List<WordItem>> changeWordStatus(List<WordItem> words, int status);
+    Flux<List<WordItem>> deleteWords(List<WordItem> words);
+    Flux<List<WordItem>> translateWord(String word);
+    Flux<Word> saveWord(List<Word> word);
 }
