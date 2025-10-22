@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.telegram.antischool.Constants.CHANGE_PERIOD_TEXT;
 import static org.telegram.antischool.Constants.START_TEXT;
 import static org.telegram.antischool.UserState.*;
 
@@ -78,7 +80,7 @@ public class ResponseHandler {
         ctx.setChatState((UserState) db.getMap(Constants.CHAT_STATES).get(ctx.getChatId()));
         chatContextes.put(ctx.getChatId(), ctx);
         message.setChatId(ctx.getChatId());
-        message.setText(START_TEXT);
+        message.setText(CHANGE_PERIOD_TEXT);
         KeyboardRow row1 = new KeyboardRow();
         row1.add("1");
         row1.add("2");
@@ -111,8 +113,16 @@ public class ResponseHandler {
         } else if ("/start".equals(message.getText()) || "start".equals(message.getText())) {
             replyToStart(chatId);
         } else if ("to learned words".equals(message.getText())) {
-            service.changeWordStatus(List.of(ctx.getCurrentWord()), 2).doOnNext(m -> System.out.println(m.size())).subscribe();
-            ctx.removeCurrentWord();
+            service.changeWordStatus(List.of(ctx.getCurrentWord()), 2).flatMap(m ->
+                   service.getToLearnWords(1).map(w -> {
+                       List<WordItem> list = new ArrayList<>(ctx.getWords());
+                       list.add(w.getFirst());
+                       ctx.setWords(list);
+                       ctx.removeCurrentWord();
+                       ctx.getWords().forEach(System.out::println);
+                       return Mono.just(w);
+                   })).subscribe();
+            getNextWord(ctx);
         } else if ( "move to learned all words".equals(message.getText())) {
             service.changeWordStatus(ctx.getWords(), 2).doOnNext(m -> System.out.println(m.size())).subscribe();
         } else if ( "delete all words".equals(message.getText())) {
