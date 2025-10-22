@@ -2,6 +2,7 @@ package org.telegram.antischool.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import org.telegram.antischool.dto.WordItem;
 import org.telegram.antischool.model.Word;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Service
+@EnableCaching
 public class WordServiceImpl implements WordService {
 
     @Autowired
@@ -24,7 +26,6 @@ public class WordServiceImpl implements WordService {
     WordRepository dbRepository;
 
     @Override
-    @Cacheable("toLearn")
     public Flux<List<WordItem>> getToLearnWords(int count) {
         return repository.getArrayMessage(Messages.getToLearnVocabularyMessage(count))
                 .flatMap(words ->
